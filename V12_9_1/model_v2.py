@@ -154,7 +154,7 @@ class HGCNLayer(nn.Module):
             # NEW: Create and register the static adjacency matrix as a buffer
             self.register_buffer("static_adj", _create_static_adjacency(torch.device("cpu")))
 
-    # MODIFIED: Update forward pass to implement the hybrid graph logic
+    # MODIFIED: Update forward pass to implement the hybrid graph logic and fix NaN issue
     def forward(self, x, bone_features, dynamic_adj=None):
         B, N, C = x.shape
         fused_input = x + bone_features
@@ -162,7 +162,13 @@ class HGCNLayer(nn.Module):
         k = self.k_proj(fused_input).view(B, N, self.num_heads, self.head_dim).transpose(1, 2)
         v = self.v_proj(fused_input).view(B, N, self.num_heads, self.head_dim).transpose(1, 2)
 
-        self_attn_adj = F.softmax((q @ k.transpose(-2, -1)) / (self.head_dim ** 0.5), dim=-1)
+        # --- START OF MODIFICATION TO FIX NaN ISSUE ---
+        # 1. Calculate attention scores. This operation can produce large values.
+        attention_scores = (q @ k.transpose(-2, -1)) / (self.head_dim ** 0.5)
+        # 2. Apply softmax using float32 to prevent numerical overflow when using autocast (mixed-precision).
+        #    This is the key change to ensure stability and avoid NaN values.
+        self_attn_adj = F.softmax(attention_scores, dim=-1, dtype=torch.float32)
+        # --- END OF MODIFICATION ---
 
         base_adj = self_attn_adj
         if self.use_hybrid_graph:
