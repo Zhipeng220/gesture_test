@@ -12,7 +12,10 @@ cfg.base = {
     'batch_size': 8,
     'epochs': 200,
     'optimizer_type': 'adamw_custom',
-    'learning_rate': 5e-5,
+    # --- MODIFICATION START ---
+    # 降低学习率以增加训练稳定性，防止权重值变得过大
+    'learning_rate': 3e-5,  # Original value was 5e-5
+    # --- MODIFICATION END ---
     'warmup_epochs': 10,
     'classifier_lr_mult': 2.0,
     'scheduler_type': 'cosine',
