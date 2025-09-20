@@ -1,8 +1,0 @@
-{
-  "file_paths": {
-    "train_csv_path": "/home/admin1108/PycharmProjects/DHSG-Net_V12/data/train_skeletons.csv",
-    "test_csv_path": "/home/admin1108/PycharmProjects/DHSG-Net_V12/data/test_skeletons.csv"
-  },
-  "log_dir": "logs_v2",
-  "summary_log_path": "results/summary_v2.txt"
-}
